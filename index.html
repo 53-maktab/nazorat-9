@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Информатика — бақылау жұмысы</title>
+<style>
+  :root{--bg:#f3f5f9;--card:#fff;--ink:#1c2333;--mut:#6b7488;--pri:#2457d6;--pri2:#e8eefc;--ok:#1f9d55;--okbg:#e6f6ed;--bad:#d64545;--badbg:#fdeaea;--line:#e1e5ee}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+  #app{max-width:760px;margin:0 auto;padding:16px}
+  #app.wide{max-width:1150px}
+  .card{background:var(--card);border-radius:16px;padding:20px;box-shadow:0 2px 14px rgba(20,30,60,.08)}
+  .narrow{max-width:400px;margin:8vh auto 0}
+  h1{margin:0 0 4px;font-size:24px}
+  h2{margin:0;font-size:20px}
+  .muted{color:var(--mut);margin:0 0 16px}
+  label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
+  input,select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:16px;background:#fff}
+  input:focus,select:focus{outline:none;border-color:var(--pri)}
+  .btn{display:inline-block;border:0;border-radius:10px;padding:12px 20px;font-size:16px;font-weight:600;background:var(--pri);color:#fff;cursor:pointer}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn.ghost{background:var(--pri2);color:var(--pri)}
+  .btn.ok{background:var(--ok)}
+  .btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+  .btn.danger{background:var(--badbg);color:var(--bad)}
+  .full{width:100%;margin-top:18px}
+  .err{color:var(--bad);min-height:22px;margin-top:10px;font-size:14px}
+  .top{display:flex;justify-content:space-between;gap:10px;color:var(--mut);font-size:14px;margin-bottom:8px}
+  .bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:18px}
+  .bar i{display:block;height:100%;background:var(--pri);transition:width .2s}
+  .q{margin:0 0 16px;font-size:20px;line-height:1.4}
+  .opts{display:grid;gap:10px}
+  .opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:16px;cursor:pointer;color:var(--ink)}
+  .opt b{flex:0 0 28px;height:28px;border-radius:50%;background:var(--pri2);color:var(--pri);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .opt.sel{border-color:var(--pri);background:var(--pri2)}
+  .opt.sel b{background:var(--pri);color:#fff}
+  .nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+  .grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+  .dot{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:#fff;font-size:14px;cursor:pointer;color:var(--ink)}
+  .dot.done{background:var(--pri2);border-color:var(--pri2);color:var(--pri);font-weight:600}
+  .dot.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri2)}
+  .score{text-align:center;padding:10px 0 18px}
+  .score .big{font-size:56px;font-weight:800;color:var(--pri);line-height:1}
+  .score .pct{color:var(--mut);margin-top:6px}
+  .rev{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+  .rev.ok{background:var(--okbg);border-color:#bfe6cf}
+  .rev.bad{background:var(--badbg);border-color:#f3c4c4}
+  .rev .qq{font-weight:600;margin-bottom:6px}
+  .rev .a{font-size:15px}
+  .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;margin-right:6px}
+  .tag.ok{background:var(--ok);color:#fff}.tag.bad{background:var(--bad);color:#fff}
+  .head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .filters select{width:auto;min-width:150px;padding:9px 12px;font-size:15px}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .stat{background:var(--pri2);color:var(--pri);border-radius:10px;padding:8px 14px;font-weight:600;font-size:14px}
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
+  th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  .st-done{color:var(--ok);font-weight:600}.st-started{color:#c77a00;font-weight:600}.st-new{color:var(--mut)}
+  .center{text-align:center}
+  @media (max-width:520px){.q{font-size:18px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ===================== SOZLAMA ===================== */
+const SUPABASE_URL = "https://mehmnbdxsmxxpjrctggw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Bcekc5CkHtgvbaClGGZ7Cw_1VkMQNVA";   // Supabase > Project Settings > API > anon public (yoki publishable) key
+/* =================================================== */
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+const $app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S = { user:null, pass:null, role:null, name:null, cls:null, questions:[], answers:{}, idx:0, rows:[], fc:'', fg:'', fs:'' };
+
+async function rpc(fn, args){
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+const wide = w => { $app.className = w ? 'wide' : ''; };
+const save = () => sessionStorage.setItem('nzans:' + S.user, JSON.stringify(S.answers));
+
+function logout(){
+  sessionStorage.removeItem('nz');
+  S = { user:null, pass:null, role:null, name:null, cls:null, questions:[], answers:{}, idx:0, rows:[], fc:'', fg:'', fs:'' };
+  viewLogin();
+}
+
+/* ---------- Kirish ---------- */
+function viewLogin(msg){
+  wide(false);
+  const noKey = SUPABASE_KEY.startsWith('PASTE');
+  $app.innerHTML = `
+  <div class="card narrow">
+    <h1>Информатика</h1>
+    <p class="muted">Бақылау жұмысы · 9-сынып</p>
+    <form id="f">
+      <label for="lg">Логин</label>
+      <input id="lg" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+      <label for="pw">Құпия сөз (парол)</label>
+      <input id="pw" type="password" autocomplete="current-password" autocapitalize="none" required>
+      <div class="err" id="err">${esc(noKey ? 'index.html ішінде SUPABASE_KEY әлі қойылмаған.' : (msg || ''))}</div>
+      <button class="btn full" type="submit">Кіру</button>
+    </form>
+  </div>`;
+  document.getElementById('f').onsubmit = async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button'); btn.disabled = true;
+    await doLogin(document.getElementById('lg').value, document.getElementById('pw').value);
+    btn.disabled = false;
+  };
+}
+
+async function doLogin(lg, pw, silent){
+  try {
+    lg = lg.trim().toLowerCase(); pw = pw.trim();
+    const r = await rpc('nz_app_login', { p_login: lg, p_pass: pw });
+    if (!r.ok) {
+      sessionStorage.removeItem('nz');
+      return viewLogin(silent ? '' : 'Логин немесе құпия сөз қате');
+    }
+    S.user = lg; S.pass = pw; S.role = r.role; S.name = r.name; S.cls = r.class;
+    sessionStorage.setItem('nz', JSON.stringify({ u: lg, p: pw }));
+    if (r.role === 'teacher') return viewTeacher();
+    if (r.done) return viewResult();
+    if (r.started) return startTest();
+    viewStart();
+  } catch (e) {
+    console.error(e);
+    viewLogin('Байланыс қатесі. Интернетті тексеріп, қайталаңыз.');
+  }
+}
+
+/* ---------- Boshlash ---------- */
+function viewStart(){
+  wide(false);
+  $app.innerHTML = `
+  <div class="card">
+    <div class="top"><span>${esc(S.cls)} сынып</span><button class="btn sm ghost" id="out">Шығу</button></div>
+    <h1>Сәлем, ${esc(S.name)}!</h1>
+    <p class="muted">Информатика · бақылау жұмысы</p>
+    <p>Тест <b>20 сұрақтан</b> тұрады. Әр сұраққа тек бір дұрыс жауап бар.</p>
+    <p>Тестті <b>тек бір рет</b> тапсыруға болады. Дайын болсаңыз, «Бастау» батырмасын басыңыз.</p>
+    <button class="btn full" id="go">Бастау</button>
+  </div>`;
+  document.getElementById('out').onclick = logout;
+  document.getElementById('go').onclick = startTest;
+}
+
+async function startTest(){
+  try {
+    const r = await rpc('nz_start_test', { p_login: S.user, p_pass: S.pass });
+    if (!r.ok) return logout();
+    if (r.done) return viewResult();
+    if (!r.questions.length) { alert('Бұл сынып үшін сұрақтар әлі қосылмаған.'); return viewStart(); }
+    S.questions = r.questions;
+    S.answers = JSON.parse(sessionStorage.getItem('nzans:' + S.user) || '{}');
+    S.idx = 0;
+    viewTest();
+  } catch (e) { console.error(e); alert('Байланыс қатесі. Қайталап көріңіз.'); }
+}
+
+/* ---------- Test ---------- */
+function viewTest(){
+  wide(false);
+  const n = S.questions.length, q = S.questions[S.idx], chosen = S.answers[q.id];
+  const answered = S.questions.filter(x => S.answers[x.id]).length;
+  $app.innerHTML = `
+  <div class="card">
+    <div class="top"><span>${esc(S.name)}</span><span>${S.idx + 1} / ${n}</span></div>
+    <div class="bar"><i style="width:${answered / n * 100}%"></i></div>
+    <h2 class="q">${S.idx + 1}. ${esc(q.q)}</h2>
+    <div class="opts">
+      ${q.options.map((o, i) => `<button class="opt ${chosen === o ? 'sel' : ''}" data-i="${i}"><b>${'ABCD'[i]}</b><span>${esc(o)}</span></button>`).join('')}
+    </div>
+    <div class="nav">
+      <button class="btn ghost" id="prev" ${S.idx === 0 ? 'disabled' : ''}>← Алдыңғы</button>
+      ${S.idx < n - 1 ? '<button class="btn" id="next">Келесі →</button>' : '<button class="btn ok" id="fin">Аяқтау</button>'}
+    </div>
+    <div class="grid">
+      ${S.questions.map((x, i) => `<button class="dot ${S.answers[x.id] ? 'done' : ''} ${i === S.idx ? 'cur' : ''}" data-g="${i}">${i + 1}</button>`).join('')}
+    </div>
+  </div>`;
+  $app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    S.answers[q.id] = q.options[+b.dataset.i]; save(); viewTest();
+  });
+  $app.querySelectorAll('.dot').forEach(b => b.onclick = () => { S.idx = +b.dataset.g; viewTest(); });
+  const prev = document.getElementById('prev'), next = document.getElementById('next'), fin = document.getElementById('fin');
+  prev.onclick = () => { S.idx--; viewTest(); };
+  if (next) next.onclick = () => { S.idx++; viewTest(); };
+  if (fin) fin.onclick = finish;
+}
+
+async function finish(){
+  const left = S.questions.filter(x => !S.answers[x.id]).length;
+  const msg = left
+    ? `Жауап берілмеген сұрақтар: ${left}. Тестті аяқтайсыз ба? Қайта тапсыруға болмайды.`
+    : 'Тестті аяқтайсыз ба? Қайта тапсыруға болмайды.';
+  if (!confirm(msg)) return;
+  const btn = document.getElementById('fin'); if (btn) btn.disabled = true;
+  try {
+    const r = await rpc('nz_submit_test', { p_login: S.user, p_pass: S.pass, p_answers: S.answers });
+    if (!r.ok) { alert('Қате орын алды. Қайталап көріңіз.'); if (btn) btn.disabled = false; return; }
+    sessionStorage.removeItem('nzans:' + S.user);
+    viewResult();
+  } catch (e) {
+    console.error(e); alert('Байланыс қатесі. Қайталап көріңіз.'); if (btn) btn.disabled = false;
+  }
+}
+
+/* ---------- Natija ---------- */
+async function viewResult(){
+  wide(false);
+  $app.innerHTML = '<div class="card center">Жүктелуде…</div>';
+  try {
+    const r = await rpc('nz_my_result', { p_login: S.user, p_pass: S.pass });
+    if (!r.ok) return logout();
+    const pct = r.total ? Math.round(r.score / r.total * 100) : 0;
+    $app.innerHTML = `
+    <div class="card">
+      <div class="top"><span>${esc(r.name)} · ${esc(r.class)}</span><button class="btn sm ghost" id="out">Шығу</button></div>
+      <div class="score"><div class="big">${r.score} / ${r.total}</div><div class="pct">Дұрыс жауаптар · ${pct}%</div></div>
+      ${r.review ? r.review.map((x, i) => `
+        <div class="rev ${x.ok ? 'ok' : 'bad'}">
+          <div class="qq">${i + 1}. ${esc(x.q)}</div>
+          <div class="a"><span class="tag ${x.ok ? 'ok' : 'bad'}">${x.ok ? 'Дұрыс' : 'Қате'}</span>${x.chosen ? esc(x.chosen) : '<i>Жауап берілмеген</i>'}</div>
+          ${x.ok ? '' : `<div class="a" style="margin-top:6px"><span class="tag ok">Дұрыс жауап</span>${esc(x.correct)}</div>`}
+        </div>`).join('') : '<p class="muted center">Тест аяқталды. Нәтижеңіз жоғарыда көрсетілген.</p>'}
+    </div>`;
+    document.getElementById('out').onclick = logout;
+  } catch (e) { console.error(e); alert('Байланыс қатесі.'); }
+}
+
+/* ---------- O'qituvchi paneli (O'zbekcha) ---------- */
+const ST = { new:'Boshlamagan', started:'Jarayonda', done:'Tugatgan' };
+
+async function viewTeacher(){
+  wide(true);
+  $app.innerHTML = '<div class="card center">Yuklanmoqda…</div>';
+  try {
+    const r = await rpc('nz_teacher_results', { p_login: S.user, p_pass: S.pass });
+    if (!r.ok) return logout();
+    S.rows = r.rows; renderTeacher();
+  } catch (e) { console.error(e); alert('Aloqa xatosi.'); }
+}
+
+function renderTeacher(){
+  const key = x => x.grade + '-' + x.class;
+  const classes = [...new Set(S.rows.map(key))];
+  const list = S.rows.filter(x =>
+    (!S.fc || key(x) === S.fc) && (!S.fg || String(x.grp) === S.fg) && (!S.fs || x.status === S.fs));
+  const done = list.filter(x => x.status === 'done');
+  const avg = done.length ? (done.reduce((a, x) => a + x.score, 0) / done.length).toFixed(1) : '—';
+  $app.innerHTML = `
+  <div class="card">
+    <div class="head"><h1>O'qituvchi paneli</h1>
+      <div><button class="btn sm ghost" id="ref">Yangilash</button> <button class="btn sm ghost" id="csv">CSV yuklab olish</button> <button class="btn sm danger" id="out">Chiqish</button></div></div>
+    <div class="stats">
+      <span class="stat">Ro'yxatda: ${list.length}</span>
+      <span class="stat">Tugatgan: ${done.length}</span>
+      <span class="stat">O'rtacha ball: ${avg}</span>
+    </div>
+    <div class="filters">
+      <select id="fc"><option value="">Barcha sinflar</option>${classes.map(c => `<option ${S.fc === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+      <select id="fg"><option value="">Barcha guruhlar</option>${['1','2'].map(g => `<option value="${g}" ${S.fg === g ? 'selected' : ''}>${g}-guruh</option>`).join('')}</select>
+      <select id="fs"><option value="">Barcha holatlar</option>${Object.entries(ST).map(([k, v]) => `<option value="${k}" ${S.fs === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>№</th><th>F.I.SH</th><th>Sinf</th><th>Guruh</th><th>Login</th><th>Holati</th><th>Ball</th><th>Topshirgan vaqt</th><th>Amallar</th></tr></thead>
+      <tbody>${list.map((x, i) => `<tr>
+        <td>${i + 1}</td><td>${esc(x.name)}</td><td>${esc(key(x))}</td><td>${x.grp}</td><td>${esc(x.login)}</td>
+        <td class="st-${x.status}">${ST[x.status]}</td>
+        <td>${x.status === 'done' ? `<b>${x.score}</b> / ${x.total}` : '—'}</td>
+        <td>${x.finished_at ? new Date(x.finished_at).toLocaleString('ru-RU') : '—'}</td>
+        <td><button class="btn sm ghost" data-re="${x.id}" ${x.status === 'new' ? 'disabled' : ''}>Qayta ochish</button>
+            <button class="btn sm ghost" data-pw="${x.id}">Parol</button></td></tr>`).join('')}
+      </tbody></table></div>
+  </div>`;
+  document.getElementById('out').onclick = logout;
+  document.getElementById('ref').onclick = viewTeacher;
+  document.getElementById('csv').onclick = () => exportCsv(list);
+  ['fc','fg','fs'].forEach(id => document.getElementById(id).onchange = e => { S[id] = e.target.value; renderTeacher(); });
+  $app.querySelectorAll('[data-re]').forEach(b => b.onclick = async () => {
+    const x = S.rows.find(r => r.id == b.dataset.re);
+    if (!confirm(`${x.name} uchun testni qayta ochasizmi? Eski natija o'chadi va yangi 20 ta savol beriladi.`)) return;
+    await act('nz_teacher_reopen', { p_student_id: x.id });
+  });
+  $app.querySelectorAll('[data-pw]').forEach(b => b.onclick = async () => {
+    const x = S.rows.find(r => r.id == b.dataset.pw);
+    const p = prompt(`${x.name} uchun yangi parol (kamida 4 belgi):`);
+    if (p === null) return;
+    const r = await act('nz_teacher_set_password', { p_student_id: x.id, p_new: p }, true);
+    if (r && r.ok) alert('Parol o\'zgartirildi.'); else if (r && r.error === 'short') alert('Parol juda qisqa.');
+  });
+}
+
+async function act(fn, args, noReload){
+  try {
+    const r = await rpc(fn, { p_login: S.user, p_pass: S.pass, ...args });
+    if (!r.ok && !r.error) return logout();
+    if (!noReload) await viewTeacher();
+    return r;
+  } catch (e) { console.error(e); alert('Aloqa xatosi.'); }
+}
+
+function exportCsv(list){
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const lines = [['Sinf','Guruh','F.I.SH','Login','Holati','Ball','Jami','Vaqt'].map(q).join(',')];
+  list.forEach(x => lines.push([x.grade + '-' + x.class, x.grp, x.name, x.login, ST[x.status], x.score ?? '', x.total ?? '', x.finished_at ?? ''].map(q).join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'natijalar.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- Ishga tushirish ---------- */
+(async () => {
+  const s = sessionStorage.getItem('nz');
+  if (s) { try { const { u, p } = JSON.parse(s); return await doLogin(u, p, true); } catch (e) {} }
+  viewLogin();
+})();
+</script>
+</body>
+</html>
